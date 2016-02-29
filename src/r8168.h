@@ -1345,68 +1345,6 @@ struct rtl8168_private {
         u8 HwSuppDashVer;
         u8 DASH;
 
-#ifdef ENABLE_DASH_SUPPORT
-        u16 AfterRecvFromFwBufLen;
-        u8 AfterRecvFromFwBuf[RECV_FROM_FW_BUF_SIZE];
-        u16 AfterSendToFwBufLen;
-        u8 AfterSendToFwBuf[SEND_TO_FW_BUF_SIZE];
-        u16 SendToFwBufferLen;
-        u32 SizeOfSendToFwBuffer ;
-        u32 SizeOfSendToFwBufferMemAlloc ;
-        u32 NumOfSendToFwBuffer ;
-
-        u8 OobReq;
-        u8 OobAck;
-        u32 OobReqComplete;
-        u32 OobAckComplete;
-
-        u8 RcvFwReqSysOkEvt;
-        u8 RcvFwDashOkEvt;
-        u8 SendFwHostOkEvt;
-
-        u8 DashFwDisableRx;
-
-        void *UnalignedSendToFwBufferVa;
-        void *SendToFwBuffer ;
-        u64 SendToFwBufferPhy ;
-        u8 SendingToFw;
-        u64 UnalignedSendToFwBufferPa;
-        PTX_DASH_SEND_FW_DESC TxDashSendFwDesc;
-        u64 TxDashSendFwDescPhy;
-        u8 *UnalignedTxDashSendFwDescVa;
-        u32 SizeOfTxDashSendFwDescMemAlloc;
-        u32 SizeOfTxDashSendFwDesc ;
-        u32 NumTxDashSendFwDesc ;
-        u32 CurrNumTxDashSendFwDesc ;
-        u64 UnalignedTxDashSendFwDescPa;
-
-        u32 NumRecvFromFwBuffer ;
-        u32 SizeOfRecvFromFwBuffer ;
-        u32 SizeOfRecvFromFwBufferMemAlloc ;
-        void *RecvFromFwBuffer ;
-        u64 RecvFromFwBufferPhy ;
-
-        void *UnalignedRecvFromFwBufferVa;
-        u64 UnalignedRecvFromFwBufferPa;
-        PRX_DASH_FROM_FW_DESC RxDashRecvFwDesc;
-        u64 RxDashRecvFwDescPhy;
-        u8 *UnalignedRxDashRecvFwDescVa;
-        u32 SizeOfRxDashRecvFwDescMemAlloc;
-        u32 SizeOfRxDashRecvFwDesc ;
-        u32 NumRxDashRecvFwDesc ;
-        u32 CurrNumRxDashRecvFwDesc ;
-        u64 UnalignedRxDashRecvFwDescPa;
-        u8 DashReqRegValue;
-        u16 HostReqValue;
-
-        u32 CmacResetIsrCounter;
-        u8 CmacResetIsr1st ;
-        u8 CmacResetIsr2nd ;
-        u8 CmacResetting ;
-        u8 CmacOobIssueCmacReset ;
-        //Dash-----------------
-#endif //ENABLE_DASH_SUPPORT
-
         //Realwow++++++++++++++
         u8 HwSuppKCPOffloadVer;
 

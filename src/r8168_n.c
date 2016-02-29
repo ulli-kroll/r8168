@@ -2526,47 +2526,16 @@ rtl8168_wait_txrx_fifo_empty(struct net_device *dev)
         }
 }
 
-#ifdef ENABLE_DASH_SUPPORT
-
-inline void
-rtl8168_enable_dash2_interrupt(struct rtl8168_private *tp, void __iomem *ioaddr)
-{
-        if (!tp->DASH) return;
-
-        if( HW_DASH_SUPPORT_TYPE_2( tp ) )
-                RTL_W8(IBIMR0, ( ISRIMR_DASH_TYPE2_ROK | ISRIMR_DASH_TYPE2_TOK | ISRIMR_DASH_TYPE2_TDU | ISRIMR_DASH_TYPE2_RDU | ISRIMR_DASH_TYPE2_RX_DISABLE_IDLE ));
-}
-
-static inline void
-rtl8168_disable_dash2_interrupt(struct rtl8168_private *tp, void __iomem *ioaddr)
-{
-        if (!tp->DASH) return;
-
-        if( HW_DASH_SUPPORT_TYPE_2( tp ) )
-                RTL_W8(IBIMR0, 0);
-}
-#endif
-
 static inline void
 rtl8168_enable_hw_interrupt(struct rtl8168_private *tp, void __iomem *ioaddr)
 {
         RTL_W16(IntrMask, tp->intr_mask);
-
-#ifdef ENABLE_DASH_SUPPORT
-        if (tp->DASH)
-                rtl8168_enable_dash2_interrupt(tp, ioaddr);
-#endif
 }
 
 static inline void
 rtl8168_disable_hw_interrupt(struct rtl8168_private *tp, void __iomem *ioaddr)
 {
         RTL_W16(IntrMask, 0x0000);
-
-#ifdef ENABLE_DASH_SUPPORT
-        if (tp->DASH)
-                rtl8168_disable_dash2_interrupt(tp, ioaddr);
-#endif
 }
 
 
@@ -2585,11 +2554,6 @@ rtl8168_switch_to_timer_interrupt(struct rtl8168_private *tp, void __iomem *ioad
                 RTL_W32(TCTR, timer_count);
                 RTL_W32(TimeInt0, timer_count);
                 RTL_W16(IntrMask, tp->timer_intr_mask);
-
-#ifdef ENABLE_DASH_SUPPORT
-                if (tp->DASH)
-                        rtl8168_enable_dash2_interrupt(tp, ioaddr);
-#endif
         } else {
                 rtl8168_switch_to_hw_interrupt(tp, ioaddr);
         }
@@ -2600,14 +2564,6 @@ rtl8168_irq_mask_and_ack(struct rtl8168_private *tp, void __iomem *ioaddr)
 {
         rtl8168_disable_hw_interrupt(tp, ioaddr);
         RTL_W16(IntrStatus, RTL_R16(IntrStatus));
-
-#ifdef ENABLE_DASH_SUPPORT
-        if ( tp->DASH ) {
-                if( HW_DASH_SUPPORT_TYPE_2( tp ) ) {
-                        RTL_W8(IBISR0, RTL_R16(IBISR0));
-                }
-        }
-#endif
 }
 
 static void
@@ -2964,26 +2920,6 @@ rtl8168_issue_offset_99_event(struct rtl8168_private *tp)
         }
 }
 
-#ifdef ENABLE_DASH_SUPPORT
-static void
-NICChkTypeEnableDashInterrupt(struct rtl8168_private *tp)
-{
-        void __iomem *ioaddr = tp->mmio_addr;
-
-        if (tp->DASH) {
-                //
-                // even disconnected, enable 3 dash interrupt mask bits for in-band/out-band communication
-                //
-                if( HW_DASH_SUPPORT_TYPE_2( tp ) ) {
-                        rtl8168_enable_dash2_interrupt(tp, ioaddr);
-                        RTL_W16(IntrMask, (ISRIMR_DASH_INTR_EN | ISRIMR_DASH_INTR_CMAC_RESET));
-                } else {
-                        RTL_W16(IntrMask, (ISRIMR_DP_DASH_OK | ISRIMR_DP_HOST_OK | ISRIMR_DP_REQSYS_OK));
-                }
-        }
-}
-#endif
-
 static void
 rtl8168_check_link_status(struct net_device *dev)
 {
@@ -3103,12 +3039,6 @@ rtl8168_check_link_status(struct net_device *dev)
                                         tp->issue_offset_99_event = TRUE;
                                 break;
                         }
-
-#ifdef ENABLE_DASH_SUPPORT
-                        if (tp->DASH) {
-                                NICChkTypeEnableDashInterrupt(tp);
-                        }
-#endif
                 }
         }
 
@@ -5714,9 +5644,6 @@ rtl8168_exit_oob(struct net_device *dev)
                 if (tp->DASH) {
                         rtl8168_driver_stop(tp);
                         rtl8168_driver_start(tp);
-#ifdef ENABLE_DASH_SUPPORT
-                        DashHwInit(dev);
-#endif
                 }
                 break;
         }
@@ -20856,18 +20783,6 @@ rtl8168_init_software_variable(struct net_device *dev)
                 break;
         }
 
-#ifdef ENABLE_DASH_SUPPORT
-        if(tp->DASH) {
-                if( HW_DASH_SUPPORT_TYPE_2( tp ) ) {
-                        tp->timer_intr_mask |= ( ISRIMR_DASH_INTR_EN | ISRIMR_DASH_INTR_CMAC_RESET);
-                        tp->intr_mask |= ( ISRIMR_DASH_INTR_EN | ISRIMR_DASH_INTR_CMAC_RESET);
-                } else {
-                        tp->timer_intr_mask |= ( ISRIMR_DP_DASH_OK | ISRIMR_DP_HOST_OK | ISRIMR_DP_REQSYS_OK );
-                        tp->intr_mask |= ( ISRIMR_DP_DASH_OK | ISRIMR_DP_HOST_OK | ISRIMR_DP_REQSYS_OK );
-                }
-        }
-#endif
-
         tp->max_jumbo_frame_size = rtl_chip_info[tp->chipset].jumbo_frame_sz;
 
         if (aspm) {
@@ -21077,11 +20992,6 @@ rtl8168_release_board(struct pci_dev *pdev,
 
         if(!tp->DASH)
                 rtl8168_phy_power_down(dev);
-
-#ifdef ENABLE_DASH_SUPPORT
-        if(tp->DASH)
-                FreeAllocatedDashShareMemory(dev);
-#endif
 
         iounmap(ioaddr);
         pci_release_regions(pdev);
@@ -21940,17 +21850,6 @@ rtl8168_do_ioctl(struct net_device *dev,
                 ret = rtl8168_asf_ioctl(dev, ifr);
                 break;
 
-#ifdef ENABLE_DASH_SUPPORT
-        case SIOCDEVPRIVATE_RTLDASH:
-                if (!netif_running(dev)) {
-                        ret = -ENODEV;
-                        break;
-                }
-
-                ret = rtl8168_dash_ioctl(dev, ifr);
-                break;
-#endif
-
 #ifdef ENABLE_REALWOW_SUPPORT
         case SIOCDEVPRIVATE_RTLREALWOW:
                 if (!netif_running(dev)) {
@@ -22556,11 +22455,6 @@ rtl8168_init_one(struct pci_dev *pdev,
         spin_lock_init(&tp->phy_lock);
 
         rtl8168_init_software_variable(dev);
-
-#ifdef ENABLE_DASH_SUPPORT
-        if(tp->DASH)
-                AllocateDashShareMemory(dev);
-#endif
 
         rtl8168_exit_oob(dev);
 
@@ -23877,11 +23771,6 @@ rtl8168_hw_config(struct net_device *dev)
         /* Set Rx packet filter */
         rtl8168_hw_set_rx_packet_filter(dev);
 
-#ifdef ENABLE_DASH_SUPPORT
-        if (tp->DASH)
-                NICChkTypeEnableDashInterrupt(tp);
-#endif
-
         switch (tp->mcfg) {
         case CFG_METHOD_14:
         case CFG_METHOD_15:
@@ -24959,40 +24848,6 @@ static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance)
                         }
                 }
 
-#ifdef ENABLE_DASH_SUPPORT
-                if ( tp->DASH ) {
-                        if( HW_DASH_SUPPORT_TYPE_2( tp ) ) {
-                                u8 DashIntType2Status;
-
-                                DashIntType2Status = RTL_R8(IBISR0);
-                                if (DashIntType2Status & ISRIMR_DASH_TYPE2_ROK) {
-                                        tp->RcvFwDashOkEvt = TRUE;
-                                }
-                                if (DashIntType2Status & ISRIMR_DASH_TYPE2_TOK) {
-                                        tp->SendFwHostOkEvt = TRUE;
-                                }
-                                if(DashIntType2Status & ISRIMR_DASH_TYPE2_RX_DISABLE_IDLE) {
-                                        tp->DashFwDisableRx = TRUE;
-                                }
-
-                                RTL_W8(IBISR0, DashIntType2Status);
-
-                                //hau_dbg
-                                //printk("status = %X DashIntType2Status = %X.\n", status, DashIntType2Status);
-                        } else {
-                                if (IntrStatus & ISRIMR_DP_REQSYS_OK) {
-                                        tp->RcvFwReqSysOkEvt = TRUE;
-                                }
-                                if (IntrStatus & ISRIMR_DP_DASH_OK) {
-                                        tp->RcvFwDashOkEvt = TRUE;
-                                }
-                                if (IntrStatus & ISRIMR_DP_HOST_OK) {
-                                        tp->SendFwHostOkEvt = TRUE;
-                                }
-                        }
-                }
-#endif
-
 #ifdef CONFIG_R8168_NAPI
                 if (status & tp->intr_mask || tp->keep_intr_cnt > 0) {
                         if (tp->keep_intr_cnt > 0) tp->keep_intr_cnt--;
@@ -25012,14 +24867,6 @@ static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance)
 
                         rtl8168_rx_interrupt(dev, tp, tp->mmio_addr, ~(u32)0);
                         rtl8168_tx_interrupt(dev, tp, ioaddr);
-
-#ifdef ENABLE_DASH_SUPPORT
-                        if ( tp->DASH ) {
-                                struct net_device *dev = tp->dev;
-
-                                HandleDashInterrupt(dev);
-                        }
-#endif
 
                         rtl8168_switch_to_timer_interrupt(tp, ioaddr);
                 } else {
@@ -25052,16 +24899,6 @@ static int rtl8168_poll(napi_ptr napi, napi_budget budget)
         RTL_NAPI_QUOTA_UPDATE(dev, work_done, budget);
 
         if (work_done < work_to_do) {
-#ifdef ENABLE_DASH_SUPPORT
-                if ( tp->DASH ) {
-                        struct net_device *dev = tp->dev;
-
-                        spin_lock_irqsave(&tp->lock, flags);
-                        HandleDashInterrupt(dev);
-                        spin_unlock_irqrestore(&tp->lock, flags);
-                }
-#endif
-
                 RTL_NETIF_RX_COMPLETE(dev, napi);
                 /*
                  * 20040426: the barrier is not strictly required but the

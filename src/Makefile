@@ -30,7 +30,6 @@
 ################################################################################
 
 ENABLE_REALWOW_SUPPORT = n
-ENABLE_DASH_SUPPORT = n
 CONFIG_DOWN_SPEED_100 = n
 CONFIG_ASPM = y
 ENABLE_S5WOL = y
@@ -42,10 +41,6 @@ ifneq ($(KERNELRELEASE),)
 	ifeq ($(ENABLE_REALWOW_SUPPORT), y)
 	    r8168-objs += r8168_realwow.o
 		EXTRA_CFLAGS += -DENABLE_REALWOW_SUPPORT
-	endif
-	ifeq ($(ENABLE_DASH_SUPPORT), y)
-	    r8168-objs += r8168_dash.o
-		EXTRA_CFLAGS += -DENABLE_DASH_SUPPORT
 	endif
 	EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
 	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
