@@ -31,15 +31,34 @@
 
 
 all:	modules
-	
+
+CONFIG_ASPM = y
+ENABLE_S5WOL = y
+
+ifneq ($(KERNELRELEASE),)
+	obj-m := r8168.o
+	r8168-objs := src/r8168_n.o src/r8168_asf.o src/rtl_eeprom.o src/rtltool.o
+	EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
+	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
+	ifeq ($(CONFIG_ASPM), y)
+		EXTRA_CFLAGS += -DCONFIG_ASPM
+	endif
+	ifeq ($(ENABLE_S5WOL), y)
+		EXTRA_CFLAGS += -DENABLE_S5WOL
+	endif
+else
+	KSRC := /lib/modules/$(shell uname -r)/build
+	PWD :=$(shell pwd)
+
+all: modules
+
 modules:
-	$(MAKE) -C src/ modules
+	$(MAKE) -C $(KSRC) M=$(PWD) modules
 
 clean:
-	$(MAKE) -C src/ clean
-
-install:
-	$(MAKE) -C src/ install
+	rm -rf src/*.o *.ko
+	rm Module.symvers modules.order
+endif
 
 
 
