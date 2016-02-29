@@ -29,7 +29,6 @@
 #  US6,570,884, US6,115,776, and US6,327,625.
 ################################################################################
 
-CONFIG_DOWN_SPEED_100 = n
 CONFIG_ASPM = y
 ENABLE_S5WOL = y
 ENABLE_EEE = n
@@ -39,9 +38,6 @@ ifneq ($(KERNELRELEASE),)
 	r8168-objs := r8168_n.o r8168_asf.o rtl_eeprom.o rtltool.o
 	EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
 	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
-	ifeq ($(CONFIG_DOWN_SPEED_100), y)
-		EXTRA_CFLAGS += -DCONFIG_DOWN_SPEED_100
-	endif
 	ifeq ($(CONFIG_ASPM), y)
 		EXTRA_CFLAGS += -DCONFIG_ASPM
 	endif

@@ -3637,14 +3637,10 @@ rtl8168_powerdown_pll(struct net_device *dev)
 
                 val = mdio_read(tp, MII_LPA);
 
-#ifdef CONFIG_DOWN_SPEED_100
-                auto_nego |= (ADVERTISE_100FULL | ADVERTISE_100HALF | ADVERTISE_10HALF | ADVERTISE_10FULL);
-#else
                 if (val & (LPA_10HALF | LPA_10FULL))
                         auto_nego |= (ADVERTISE_10HALF | ADVERTISE_10FULL);
                 else
                         auto_nego |= (ADVERTISE_100FULL | ADVERTISE_100HALF | ADVERTISE_10HALF | ADVERTISE_10FULL);
-#endif
 
                 if (tp->DASH)
                         auto_nego |= (ADVERTISE_100FULL | ADVERTISE_100HALF | ADVERTISE_10HALF | ADVERTISE_10FULL);
