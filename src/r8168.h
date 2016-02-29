@@ -1351,11 +1351,6 @@ struct rtl8168_private {
         u8 EnableDhcpTimeoutWake;
         u8 EnableTeredoOffload;
         u8 EnableKCPOffload;
-#ifdef ENABLE_REALWOW_SUPPORT
-        u32 DhcpTimeout;
-        MP_KCP_INFO MpKCPInfo;
-        //Realwow--------------
-#endif //ENABLE_REALWOW_SUPPORT
 
 #ifdef ENABLE_R8168_PROCFS
         //Procfs support

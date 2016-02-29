@@ -5674,37 +5674,6 @@ rtl8168_exit_oob(struct net_device *dev)
                 break;
         }
 
-#ifndef ENABLE_REALWOW_SUPPORT
-        switch (tp->mcfg) {
-        case CFG_METHOD_21:
-        case CFG_METHOD_22:
-                rtl8168_eri_write(ioaddr, 0x174, 2, 0x0000, ERIAR_ExGMAC);
-                mac_ocp_write(tp, 0xE428, 0x0010);
-                break;
-        case CFG_METHOD_24:
-        case CFG_METHOD_25:
-        case CFG_METHOD_26:
-        case CFG_METHOD_28:
-                rtl8168_eri_write(ioaddr, 0x174, 2, 0x00FF, ERIAR_ExGMAC);
-                mac_ocp_write(tp, 0xE428, 0x0010);
-                break;
-        case CFG_METHOD_29:
-        case CFG_METHOD_30: {
-                u32 csi_tmp;
-                csi_tmp = rtl8168_eri_read(ioaddr, 0x174, 2, ERIAR_ExGMAC);
-                csi_tmp &= ~(BIT_8);
-                csi_tmp |= (BIT_15);
-                rtl8168_eri_write(ioaddr, 0x174, 2, csi_tmp, ERIAR_ExGMAC);
-                mac_ocp_write(tp, 0xE428, 0x0010);
-        }
-        break;
-        }
-#endif //ENABLE_REALWOW_SUPPORT
-
-#ifdef ENABLE_REALWOW_SUPPORT
-        realwow_hw_init(dev);
-#endif
-
         rtl8168_nic_reset(dev);
 
         switch (tp->mcfg) {
@@ -20757,10 +20726,6 @@ rtl8168_init_software_variable(struct net_device *dev)
                 break;
         }
 
-#ifdef ENABLE_REALWOW_SUPPORT
-        get_realwow_hw_version(dev);
-#endif //ENABLE_REALWOW_SUPPORT
-
         if (HW_DASH_SUPPORT_DASH(tp) && rtl8168_check_dash(tp))
                 tp->DASH = 1;
         else
@@ -21849,17 +21814,6 @@ rtl8168_do_ioctl(struct net_device *dev,
 
                 ret = rtl8168_asf_ioctl(dev, ifr);
                 break;
-
-#ifdef ENABLE_REALWOW_SUPPORT
-        case SIOCDEVPRIVATE_RTLREALWOW:
-                if (!netif_running(dev)) {
-                        ret = -ENODEV;
-                        break;
-                }
-
-                ret = rtl8168_realwow_ioctl(dev, ifr);
-                break;
-#endif
 
         case SIOCRTLTOOL:
                 ret = rtltool_ioctl(tp, ifr);
@@ -25037,10 +24991,6 @@ static void rtl8168_shutdown(struct pci_dev *pdev)
         rtl8168_set_bios_setting(dev);
         rtl8168_rar_set(tp, tp->org_mac_addr);
 
-#ifdef ENABLE_REALWOW_SUPPORT
-        set_realwow_d3_para(dev);
-#endif
-
         if (s5wol == 0)
                 tp->wol_enabled = WOL_DISABLED;
 
@@ -25110,10 +25060,6 @@ rtl8168_suspend(struct pci_dev *pdev, pm_message_t state)
         rtl8168_sleep_rx_enable(dev);
 
         rtl8168_hw_d3_para(dev);
-
-#ifdef ENABLE_REALWOW_SUPPORT
-        set_realwow_d3_para(dev);
-#endif
 
         rtl8168_powerdown_pll(dev);
 

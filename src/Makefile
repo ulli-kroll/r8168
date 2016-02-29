@@ -29,7 +29,6 @@
 #  US6,570,884, US6,115,776, and US6,327,625.
 ################################################################################
 
-ENABLE_REALWOW_SUPPORT = n
 CONFIG_DOWN_SPEED_100 = n
 CONFIG_ASPM = y
 ENABLE_S5WOL = y
@@ -38,10 +37,6 @@ ENABLE_EEE = n
 ifneq ($(KERNELRELEASE),)
 	obj-m := r8168.o
 	r8168-objs := r8168_n.o r8168_asf.o rtl_eeprom.o rtltool.o
-	ifeq ($(ENABLE_REALWOW_SUPPORT), y)
-	    r8168-objs += r8168_realwow.o
-		EXTRA_CFLAGS += -DENABLE_REALWOW_SUPPORT
-	endif
 	EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
 	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
 	ifeq ($(CONFIG_DOWN_SPEED_100), y)
